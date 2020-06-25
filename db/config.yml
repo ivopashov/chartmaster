@@ -1,0 +1,10 @@
+development:
+  adapter: postgresql
+  encoding: unicode
+  database: chartmaster_development
+  pool: 5
+  username: ivopashov
+production:
+  adapter: postgresql
+  encoding: unicode
+  url: <%= ENV['DATABASE_URL'] %>

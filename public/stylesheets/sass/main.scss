@@ -1,0 +1,93 @@
+.legend {
+  position: absolute;
+  z-index: 1000;
+  top: 5px;
+  left: 5px;
+  font-size: 12px;
+}
+
+.trading-window {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.chart {
+  position: relative;
+  width: 70%;
+  height: 400px;
+}
+
+.trade-info {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.below-the-chart-actions {
+  width: 70%;
+}
+
+.progress-chart,
+.actions,
+.next-chart {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.progress-chart,
+.next-chart {
+  height: 3rem;
+}
+
+.actions {
+  height: 6rem;
+}
+
+.progress-chart,
+.next-chart {
+  button {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+button {
+  outline-style: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.actions {
+  #buy,
+  #sell {
+    height: 100%;
+    width: 45%;
+    font-size: 3rem;
+    font-weight: bold;
+  }
+
+  #sell {
+    margin-left: 10%;
+  }
+
+  #cover {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.trade-info {
+  font-size: 1.5rem;
+}
+
+.btn {
+  font-size: 1.5rem;
+}
