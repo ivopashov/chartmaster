@@ -9,25 +9,50 @@
 </head>
 <body>
   <div class="container">
+    <div class="jumbotron">
+      <div class="row">
+        <div class="col-6">
+        <h1 class="display-6">Master the 📈📉!</h1>
+          <p class="lead">
+            Real historical data. Anonymous SP500 stock.
+          </p>
+        </div>
+        <div class="col-6">
+          <h1 class="account-balance display-6">You have $<span class="value">10000</span></h1>
+          <p class="lead entry-price">
+            Entry price <span class="value">-</span>
+          </p>
+        </div>
+      </div>
+    </div>
     <div class="trading-window">
-        <div class="chart-wrapper">
+        <div class="row">
+          <div class="col-12 col-md-10">
             <div class="chart">
                 <div class="legend"></div>
             </div>
-            <div class="trade-info">
-                <div>Account: $<span id="balance"></span></div>
-                <div>Entry price: $<span class="entry-price">-</span></div>
-            </div>
-        </div>
-        <div class="below-the-chart-actions">
+          </div>
+          <div class="col-12 col-md-2">
             <div class="progress-chart">
-                <button id="more" class="btn btn-info">Progress Chart</button>
+                <button class="btn btn-info more-js">Next day</button>
             </div>
             <div class="actions">
+              <div class="btn-group buy-sell" role="group" aria-label="Buy sell button group">
+                <button type="button" class="btn btn-success buy-js">
+                    Buy
+                </button>
+                <button type="button" class="btn btn-danger sell-js">
+                    Sell
+                </button>
+              </div>
+              <button type="button" class="btn btn-warning cover-js cover" style="display: none;">
+                Cover
+              </button>
             </div>
             <div class="next-chart">
-              <button id="next" class="btn btn-info">Next Chart</button>
+              <button class="btn btn-info next-js">New 📈</button>
             </div>
+          </div>
         </div>
     </div>
   </div>

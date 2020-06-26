@@ -43,6 +43,7 @@ def seed_for(ticker, start_date)
   end
 end
 
+# rake 'stocks[MSFT:AAPL:NFLX,2010-01-01]'
 task :stocks, [:stocks,:start_date] do |t, args|
   tickers_list = args[:stocks].present? ? args[:stocks].split(':') : []
   start_date = args[:start_date] ? Date.parse(args[:start_date]) : Date.parse('2010-01-01')
