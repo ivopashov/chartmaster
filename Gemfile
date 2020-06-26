@@ -9,3 +9,7 @@ gem 'rake'
 gem 'rack'
 gem 'sass'
 gem 'sinatra-contrib'
+
+group :production do
+  gem 'puma'
+end
