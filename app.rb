@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'sinatra/activerecord'
-require 'json'
 require 'sinatra/reloader' if development?
+require 'json'
 
 set :database_file, 'db/config.yml'
 
