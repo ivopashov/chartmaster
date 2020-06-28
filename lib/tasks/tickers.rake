@@ -43,6 +43,22 @@ def seed_for(ticker, start_date)
   end
 end
 
+def calculate_smas(ticker)
+  stock_records = StockSnapshot.where(ticker: ticker).order(date: :asc).to_a
+
+  stock_records.each_with_index do |stock_record, index|
+    batch_of_twenty = stock_records[(index - 20)...index]
+    batch_of_fifty = stock_records[(index - 50)...index]
+    batch_of_two_hundred = stock_records[(index - 200)...index]
+
+    stock_record.sma20 = (batch_of_twenty.map(&:close).sum / 20).round(2) if batch_of_twenty.size == 20
+    stock_record.sma50 = (batch_of_fifty.map(&:close).sum / 50).round(2) if batch_of_fifty.size == 50
+    stock_record.sma200 = (batch_of_two_hundred.map(&:close).sum / 200).round(2) if batch_of_two_hundred.size == 200
+
+    stock_record.save!
+  end
+end
+
 # rake 'stocks[MSFT:AAPL:NFLX,2010-01-01]'
 task :stocks, [:stocks,:start_date] do |t, args|
   tickers_list = args[:stocks].present? ? args[:stocks].split(':') : []
@@ -69,4 +85,11 @@ task :stocks, [:stocks,:start_date] do |t, args|
   end
 
   threads.map(&:join)
+end
+
+task :calculate_smas do
+  SymbolMap.all.each do |symbol_map|
+    puts "calculating smas (20, 50, 200) for: #{symbol_map.ticker}"
+    calculate_smas symbol_map.ticker
+  end
 end

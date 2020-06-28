@@ -6,6 +6,9 @@ let app = {
     hasShortPosition: false,
     currentCandle: {},
     moreData: [],
+    moresma20: [],
+    moresma200: [],
+    moresma50: [],
     currentEntryPrice: undefined,
     currentStockId: undefined,
     lastAvailableCandle: undefined
@@ -44,26 +47,25 @@ $('body').on('click', '.sell-js', function() {
 $('body').on('click', '.next-js', feedChartWithData);
 
 $('body').on('click', '.more-js', function() {
-    if (app.moreData.length > 10) {
-      let priceItem = app.moreData.shift();
-      addItem(priceItem);
-    } else {
+    if (app.moreData.length < 10) {
         fetchMoreData();
-
-        if (app.moreData.length > 0) {
-            let priceItem = app.moreData.shift();
-            addItem(priceItem);
-        }
     }
+
+    addItem();
 });
 
 
-function addItem(priceItem) {
-  app.priceSeries.update(priceItem);
-  app.volumeSeries.update(priceItem);
-  app.currentCandle = priceItem;
-  buyPositionProgressHandler(priceItem);
-  sellPositionProgressHandler(priceItem);
+function addItem() {
+    app.sma20.update(app.moresma20.shift());
+    app.sma50.update(app.moresma50.shift());
+    app.sma200.update(app.moresma200.shift());
+
+    let priceItem = app.moreData.shift();
+    app.priceSeries.update(priceItem);
+    app.volumeSeries.update(priceItem);
+    app.currentCandle = priceItem;
+    buyPositionProgressHandler(priceItem);
+    sellPositionProgressHandler(priceItem);
 }
 
 function sellPositionProgressHandler(priceItem) {
@@ -97,13 +99,19 @@ function buyPositionProgressHandler (priceItem) {
 function feedChartWithData () {
     $.ajax({url: '/chart'})
         .done(function(data) {
-            app.lastAvailableCandle = Object.assign({}, data.data[data.data.length - 1]);
-            app.currentCandle = Object.assign({}, data.data[data.data.length - 1]);
+            app.lastAvailableCandle = Object.assign({}, data.stock_prices[data.stock_prices.length - 1]);
+            app.currentCandle = Object.assign({}, data.stock_prices[data.stock_prices.length - 1]);
             app.currentStockId = data.id;
-            app.priceSeries.setData(data.data);
-            app.volumeSeries.setData(data.data);
+            app.priceSeries.setData(data.stock_prices);
+            app.sma20.setData(data.sma20);
+            app.sma50.setData(data.sma50);
+            app.sma200.setData(data.sma200);
+            app.volumeSeries.setData(data.stock_prices);
 
             app.moreData = [];
+            app.moresma20 = [];
+            app.moresma50 = [];
+            app.moresma200 = [];
             fetchMoreData();
         });
 }
@@ -111,8 +119,20 @@ function feedChartWithData () {
 function fetchMoreData () {
     $.ajax({url: `/more?id=${app.currentStockId}&date=${app.lastAvailableCandle['time']}`})
         .done(function(data) {
-            data.data.forEach(function (item) {
+            data.stock_prices.forEach(function (item) {
                 app.moreData.push(item);
+            });
+
+            data.sma20.forEach(function (item) {
+                app.moresma20.push(item);
+            });
+
+            data.sma50.forEach(function (item) {
+                app.moresma50.push(item);
+            });
+
+            data.sma200.forEach(function (item) {
+                app.moresma200.push(item);
             });
 
             app.lastAvailableCandle = app.moreData[app.moreData.length - 1];
@@ -122,6 +142,9 @@ function fetchMoreData () {
 function initializeChart () {
     app.chart = LightweightCharts.createChart(document.getElementsByClassName('chart')[0]);
     app.priceSeries = app.chart.addCandlestickSeries();
+    app.sma20 = app.chart.addLineSeries({color: '#FF8000', lineWidth: 1, priceLineVisible: false, baseLineVisible: false, lastValueVisible: false});
+    app.sma50 = app.chart.addLineSeries({color: '#008000', lineWidth: 1, priceLineVisible: false, baseLineVisible: false, lastValueVisible: false});
+    app.sma200 = app.chart.addLineSeries({color: '#800080', lineWidth: 1, priceLineVisible: false, baseLineVisible: false, lastValueVisible: false});
     app.volumeSeries = app.chart.addHistogramSeries({
         color: "rgba(168, 168, 168, 0.5)",
         lineWidth: 2,
@@ -169,10 +192,14 @@ function initializeChart () {
 
     app.chart.subscribeCrosshairMove(function(param) {
         if (param) {
-            var price = param.seriesPrices.get(app.priceSeries);
-            var volume = param.seriesPrices.get(app.volumeSeries);
+            let price = param.seriesPrices.get(app.priceSeries);
+            let volume = param.seriesPrices.get(app.volumeSeries);
+            let sma20 = param.seriesPrices.get(app.sma20);
+            let sma50 = param.seriesPrices.get(app.sma50);
+            let sma200 = param.seriesPrices.get(app.sma200);
+
             if (price) {
-                $('.legend').html(`<div>O: ${price.open} H: ${price.high} C: ${price.close} L: ${price.low} V: ${volume}</div>`);
+                $('.legend').html(`<div>O: ${price.open} H: ${price.high} C: ${price.close} L: ${price.low} V: ${volume} <span class="sma20legend">SMA20: ${sma20}</span> <span class="sma50legend">SMA50: ${sma50}</span> <span class="sma200legend">SMA200: ${sma200}</span></div>`);
             }
         }
     });
