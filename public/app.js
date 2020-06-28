@@ -1,11 +1,14 @@
 let app = {
     initialBalance: 10000,
+    goingBalance: 10000,
+    balanceOnEntry: 10000,
     hasLongPosition: false,
     hasShortPosition: false,
     currentCandle: {},
     moreData: [],
     currentEntryPrice: undefined,
-    currentStockId: undefined
+    currentStockId: undefined,
+    lastAvailableCandle: undefined
 };
 
 initializeChart();
@@ -17,11 +20,12 @@ $('body').on('click', '.cover-js', function() {
     $('.buy-sell').show();
     $('.cover-js').hide();
     app.currentEntryPrice = undefined;
-    $('.entry-price').html('-');
+    $('.entry-price .value').html('-')
 });
 
 $('body').on('click', '.buy-js', function() {
     app.hasLongPosition = true;
+    app.balanceOnEntry = app.goingBalance;
     $('.buy-sell').hide();
     $('.cover-js').show();
     app.currentEntryPrice = app.currentCandle['close'];
@@ -30,6 +34,7 @@ $('body').on('click', '.buy-js', function() {
 
 $('body').on('click', '.sell-js', function() {
     app.hasShortPosition = true;
+    app.balanceOnEntry = app.goingBalance;
     $('.buy-sell').hide();
     $('.cover-js').show();
     app.currentEntryPrice = app.currentCandle['close'];
@@ -39,21 +44,16 @@ $('body').on('click', '.sell-js', function() {
 $('body').on('click', '.next-js', feedChartWithData);
 
 $('body').on('click', '.more-js', function() {
-    if (app.moreData.length > 5) {
+    if (app.moreData.length > 10) {
       let priceItem = app.moreData.shift();
       addItem(priceItem);
     } else {
-      $('.more-js').attr('disabled', true);
-      $.ajax({url: `/more?id=${app.currentStockId}&date=${app.currentCandle['time'].year}-${app.currentCandle['time'].month}-${app.currentCandle['time'].day}`})
-        .done(function( data ) {
-            $('.more-js').attr('disabled', false);
-            app.moreData = app.moreData.concat(data);
+        fetchMoreData();
 
-            if(app.moreData.length > 0) {
-                let priceItem = app.moreData.shift();
-                addItem(priceItem);
-            }
-        });
+        if (app.moreData.length > 0) {
+            let priceItem = app.moreData.shift();
+            addItem(priceItem);
+        }
     }
 });
 
@@ -61,6 +61,7 @@ $('body').on('click', '.more-js', function() {
 function addItem(priceItem) {
   app.priceSeries.update(priceItem);
   app.volumeSeries.update(priceItem);
+  app.currentCandle = priceItem;
   buyPositionProgressHandler(priceItem);
   sellPositionProgressHandler(priceItem);
 }
@@ -71,13 +72,12 @@ function sellPositionProgressHandler(priceItem) {
     }
 
     let difference = (priceItem['close'] - app.currentEntryPrice) / app.currentEntryPrice;
-    app.currentCandle = priceItem;
 
-    let updatedBalance = Math.floor((app.initialBalance) * (1 + (-1) * difference));
+    app.goingBalance = Math.floor((app.balanceOnEntry) * (1 + (-1) * difference));
 
-    $('.account-balance .value').html(updatedBalance);
+    $('.account-balance .value').html(app.goingBalance);
 
-    let textColor = updatedBalance > app.initialBalance ? 'text-success' : 'text-danger';
+    let textColor = app.goingBalance > app.initialBalance ? 'text-success' : 'text-danger';
     $('.account-balance .value').removeClass('text-danger text-success').addClass(textColor);
 }
 
@@ -87,23 +87,36 @@ function buyPositionProgressHandler (priceItem) {
     }
 
     let difference = (priceItem['close'] - app.currentEntryPrice) / app.currentEntryPrice;
-    app.currentCandle = priceItem;
 
-    let updatedBalance = Math.floor((app.initialBalance) * (1 + difference));
-    $('.account-balance .value').html(updatedBalance);
-    let textColor = updatedBalance > app.initialBalance ? 'text-success' : 'text-danger';
+    app.goingBalance = Math.floor((app.balanceOnEntry) * (1 + difference));
+    $('.account-balance .value').html(app.goingBalance);
+    let textColor = app.goingBalance > app.initialBalance ? 'text-success' : 'text-danger';
     $('.account-balance .value').removeClass('text-danger text-success').addClass(textColor);
 }
 
 function feedChartWithData () {
-  $.ajax({url: '/chart'})
-    .done(function(data) {
-      app.currentStockId = data.id;
-      app.currentCandle = data.data[data.data.length - 1]
-      app.priceSeries.setData(data.data);
-      app.volumeSeries.setData(data.data);
-      app.moreData = [];
-  });
+    $.ajax({url: '/chart'})
+        .done(function(data) {
+            app.lastAvailableCandle = Object.assign({}, data.data[data.data.length - 1]);
+            app.currentCandle = Object.assign({}, data.data[data.data.length - 1]);
+            app.currentStockId = data.id;
+            app.priceSeries.setData(data.data);
+            app.volumeSeries.setData(data.data);
+
+            app.moreData = [];
+            fetchMoreData();
+        });
+}
+
+function fetchMoreData () {
+    $.ajax({url: `/more?id=${app.currentStockId}&date=${app.lastAvailableCandle['time']}`})
+        .done(function(data) {
+            data.data.forEach(function (item) {
+                app.moreData.push(item);
+            });
+
+            app.lastAvailableCandle = app.moreData[app.moreData.length - 1];
+        });
 }
 
 function initializeChart () {
