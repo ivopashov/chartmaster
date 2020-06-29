@@ -6,6 +6,14 @@
   font-size: 12px;
 }
 
+.lead {
+  font-size: 1rem;
+
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+  }
+}
+
 .trading-window {
   display: flex;
   flex-direction: column;
@@ -13,7 +21,11 @@
 
 .chart {
   position: relative;
-  height: 400px;
+  height: 250px;
+
+  @media (min-width: 768px) {
+    height: 400px;
+  }
 }
 
 .progress-chart,
@@ -59,7 +71,11 @@ button {
 .actions,
 .progress-chart,
 .next-chart {
-  height: 120px;
+  height: 50px;
+
+  @media (min-width: 768px) {
+    height: 120px;
+  }
 }
 
 .buy-sell {
