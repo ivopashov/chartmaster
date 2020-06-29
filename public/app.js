@@ -204,5 +204,19 @@ function initializeChart () {
         }
     });
 
+    app.chart.subscribeClick(function (param) {
+        if (param) {
+            let price = param.seriesPrices.get(app.priceSeries);
+            let volume = param.seriesPrices.get(app.volumeSeries);
+            let sma20 = param.seriesPrices.get(app.sma20);
+            let sma50 = param.seriesPrices.get(app.sma50);
+            let sma200 = param.seriesPrices.get(app.sma200);
+
+            if (price) {
+                $('.legend').html(`<div>O: ${price.open} H: ${price.high} C: ${price.close} L: ${price.low} V: ${volume} <span class="sma20legend">SMA20: ${sma20}</span> <span class="sma50legend">SMA50: ${sma50}</span> <span class="sma200legend">SMA200: ${sma200}</span></div>`);
+            }
+        }
+    });
+
     feedChartWithData();
 }
