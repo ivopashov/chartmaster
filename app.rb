@@ -58,7 +58,7 @@ get '/more' do
   ticker = SymbolMap.where(anonymous_ticker: params[:id]).first.ticker
   data_points = {stock_prices: [], sma20: [], sma50: [], sma200: []}
 
-  StockSnapshot.where('ticker = ? AND date > ?', ticker, params[:date]).order(:date).limit(30).map do |entry|
+  StockSnapshot.where('ticker = ? AND date > ?', ticker, params[:date]).order(:date).limit(100).map do |entry|
     data_points[:stock_prices].push format(entry)
     data_points[:sma20].push({time: entry.date, value: entry.sma20.round(2)})
     data_points[:sma50].push({time: entry.date, value: entry.sma50.round(2)})
