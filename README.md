@@ -17,9 +17,10 @@ bundle install
 bundle exec rake db:create
 bundle exec rake db:migrate
 ```
-3. Seed your database with some stocks. Same command to add more once added.
+3. Seed your database with some stocks and calculate simple moving averages
 ```bash
 bundle exec rake 'stocks[MSFT:AAPL:NFLX,2010-01-01]'
+bundle exec rake calculate_smas
 ```
 4. Start the application
 ```bash
