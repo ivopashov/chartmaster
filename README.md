@@ -28,3 +28,5 @@ rackup
 
 # open http://127.0.0.1:9292/ in a browser
 ```
+
+or visit chartchef.com and give it a go
